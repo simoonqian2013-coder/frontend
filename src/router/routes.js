@@ -33,7 +33,7 @@ const frameIn = [
                 path: 'setting/role',
                 name: 'setting-role',
                 meta: {
-                    title: 'Roles',
+                    title: '角色',
                     auth: true
                 },
                 component: () => import('@/pages/system/role')

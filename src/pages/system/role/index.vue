@@ -3,28 +3,28 @@
         <Card :bordered="false" dis-hover>
             <div slot="title">
                 <Icon type="md-settings" size="16" />
-                <span class="ivu-pl-8">Roles</span>
+                <span class="ivu-pl-8">角色管理</span>
             </div>
             <div slot="extra">
-                <Button type="primary" @click="handleAdd">New Role</Button>
+                <Button type="primary" @click="handleAdd">新增角色</Button>
             </div>
             <Form inline :label-width="60" class="ivu-mb">
-                <FormItem label="Name">
-                    <Input v-model="query.name" placeholder="Search by name" clearable />
+                <FormItem label="名称">
+                    <Input v-model="query.name" placeholder="按名称搜索" clearable />
                 </FormItem>
                 <FormItem>
-                    <Button type="primary" @click="handleSearch">Search</Button>
-                    <Button class="ivu-ml-8" @click="handleReset">Reset</Button>
+                    <Button type="primary" @click="handleSearch">查询</Button>
+                    <Button class="ivu-ml-8" @click="handleReset">重置</Button>
                 </FormItem>
             </Form>
             <Table :columns="columns" :data="tableData" :loading="loading">
                 <template slot-scope="{ row }" slot="status">
-                    <Tag color="green" v-if="row.status === 1">Active</Tag>
-                    <Tag color="red" v-else>Disabled</Tag>
+                    <Tag color="green" v-if="row.status === 1">启用</Tag>
+                    <Tag color="red" v-else>禁用</Tag>
                 </template>
                 <template slot-scope="{ row }" slot="actions">
-                    <Button size="small" type="primary" @click="handleEdit(row)">Edit</Button>
-                    <Button size="small" type="error" class="ivu-ml-8" @click="handleDelete(row)">Delete</Button>
+                    <Button size="small" type="primary" @click="handleEdit(row)">编辑</Button>
+                    <Button size="small" type="error" class="ivu-ml-8" @click="handleDelete(row)">删除</Button>
                 </template>
             </Table>
             <div class="ivu-mt">
@@ -42,25 +42,25 @@
 
         <Modal v-model="modalVisible" :title="modalTitle" :mask-closable="false">
             <Form ref="roleForm" :model="formModel" :rules="rules" label-width="90">
-                <FormItem label="Code" prop="code">
-                    <Input v-model="formModel.code" placeholder="Role code" />
+                <FormItem label="编码" prop="code">
+                    <Input v-model="formModel.code" placeholder="角色编码" />
                 </FormItem>
-                <FormItem label="Name" prop="name">
-                    <Input v-model="formModel.name" placeholder="Role name" />
+                <FormItem label="名称" prop="name">
+                    <Input v-model="formModel.name" placeholder="角色名称" />
                 </FormItem>
-                <FormItem label="Description" prop="description">
+                <FormItem label="描述" prop="description">
                     <Input v-model="formModel.description" type="textarea" :rows="3" />
                 </FormItem>
-                <FormItem label="Status" prop="status">
+                <FormItem label="状态" prop="status">
                     <Select v-model="formModel.status">
-                        <Option :value="1">Active</Option>
-                        <Option :value="0">Disabled</Option>
+                        <Option :value="1">启用</Option>
+                        <Option :value="0">禁用</Option>
                     </Select>
                 </FormItem>
             </Form>
             <div slot="footer">
-                <Button @click="modalVisible = false">Cancel</Button>
-                <Button type="primary" :loading="modalLoading" @click="handleSubmit">Save</Button>
+                <Button @click="modalVisible = false">取消</Button>
+                <Button type="primary" :loading="modalLoading" @click="handleSubmit">保存</Button>
             </div>
         </Modal>
     </div>
@@ -92,27 +92,27 @@
                 tableData: [],
                 columns: [
                     { title: 'ID', key: 'id', width: 80 },
-                    { title: 'Code', key: 'code', minWidth: 120 },
-                    { title: 'Name', key: 'name', minWidth: 120 },
-                    { title: 'Description', key: 'description', minWidth: 160 },
-                    { title: 'Status', slot: 'status', width: 100 },
-                    { title: 'Created At', key: 'createdAt', minWidth: 160 },
-                    { title: 'Actions', slot: 'actions', width: 180, align: 'center' }
+                    { title: '编码', key: 'code', minWidth: 120 },
+                    { title: '名称', key: 'name', minWidth: 120 },
+                    { title: '描述', key: 'description', minWidth: 160 },
+                    { title: '状态', slot: 'status', width: 100 },
+                    { title: '创建时间', key: 'createdAt', minWidth: 160 },
+                    { title: '操作', slot: 'actions', width: 180, align: 'center' }
                 ],
                 modalVisible: false,
                 modalMode: 'create',
                 modalLoading: false,
                 formModel: defaultForm(),
                 rules: {
-                    code: [{ required: true, message: 'Code is required', trigger: 'blur' }],
-                    name: [{ required: true, message: 'Name is required', trigger: 'blur' }],
-                    status: [{ required: true, type: 'number', message: 'Status is required', trigger: 'change' }]
+                    code: [{ required: true, message: '请输入编码', trigger: 'blur' }],
+                    name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
+                    status: [{ required: true, type: 'number', message: '请选择状态', trigger: 'change' }]
                 }
             }
         },
         computed: {
             modalTitle () {
-                return this.modalMode === 'create' ? 'Create Role' : 'Edit Role';
+                return this.modalMode === 'create' ? '创建角色' : '编辑角色';
             }
         },
         created () {
@@ -173,8 +173,8 @@
             },
             handleDelete (row) {
                 Modal.confirm({
-                    title: 'Confirm',
-                    content: 'Delete this role?',
+                    title: '确认',
+                    content: '确定删除该角色吗？',
                     onOk: () => {
                         RoleDelete(row.id).then(() => {
                             if (this.tableData.length === 1 && this.query.page > 1) {

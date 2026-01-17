@@ -5,16 +5,13 @@ import Setting from '@/setting';
 
 import { Message, Notice } from 'view-design';
 
-// 创建一个错�?
 function errorCreate (msg) {
     const err = new Error(msg);
     errorLog(err);
     throw err;
 }
 
-// 记录和显示错�?
 function errorLog (err) {
-    // 添加到日�?
     store.dispatch('admin/log/push', {
         message: '数据请求异常',
         type: 'error',
@@ -27,7 +24,6 @@ function errorLog (err) {
         util.log.error('>>>>>> Error >>>>>>');
         console.log(err);
     }
-    // 显示提示，可配置使用 iView �?$Message 还是 $Notice 组件来显�?
     if (Setting.errorModalType === 'Message') {
         Message.error({
             content: err.message,
@@ -42,16 +38,13 @@ function errorLog (err) {
     }
 }
 
-// 创建一�?axios 实例
 const service = axios.create({
     baseURL: Setting.apiBaseURL,
     timeout: 5000 // 请求超时时间
 });
 
-// 请求拦截�?
 service.interceptors.request.use(
     config => {
-        // 在请求发送之前做一些处�?
         const token = util.cookies.get('token');
         if (token) {
         config.headers.Authorization = 'Bearer ' + token;
@@ -59,7 +52,6 @@ service.interceptors.request.use(
         return config;
     },
     error => {
-        // 发送失�?
         console.log(error);
         Promise.reject(error);
     }
@@ -83,7 +75,6 @@ service.interceptors.response.use(
                 errorCreate(`[ code: xxx ] ${dataAxios.msg}: ${response.config.url}`);
                 break;
             default:
-                // 不是正确�?code
                 errorCreate(`${dataAxios.msg}: ${response.config.url}`);
                 break;
             }
@@ -112,6 +103,3 @@ service.interceptors.response.use(
 );
 
 export default service;
-
-
-

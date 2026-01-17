@@ -8,7 +8,7 @@ export default {
     children: [
         {
             path: `${pre}role`,
-            title: 'Roles'
+            title: '角色'
         }
     ]
 }

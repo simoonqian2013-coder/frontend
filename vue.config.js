@@ -15,7 +15,13 @@ module.exports = {
     runtimeCompiler: true,
     productionSourceMap: false,
     devServer: {
-        publicPath: Setting.publicPath
+        publicPath: Setting.publicPath,
+        proxy: {
+            '/api': {
+                target: 'http://localhost:8081',
+                changeOrigin: true
+            }
+        }
     },
     css: {
         loaderOptions: {

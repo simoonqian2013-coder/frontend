@@ -2,7 +2,7 @@ import request from '@/plugins/request';
 
 export function AccountLogin (data) {
     return request({
-        url: '/api/login',
+        url: '/api/auth/login',
         method: 'post',
         data
     });

@@ -29,6 +29,15 @@ const frameIn = [
                 },
                 component: () => import('@/pages/system/log')
             },
+            {
+                path: 'setting/role',
+                name: 'setting-role',
+                meta: {
+                    title: 'Roles',
+                    auth: true
+                },
+                component: () => import('@/pages/system/role')
+            },
             // 刷新页面 必须保留
             {
                 path: 'refresh',

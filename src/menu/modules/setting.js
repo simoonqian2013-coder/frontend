@@ -9,6 +9,10 @@ export default {
         {
             path: `${pre}role`,
             title: '角色'
+        },
+        {
+            path: `${pre}user`,
+            title: '用户'
         }
     ]
 }

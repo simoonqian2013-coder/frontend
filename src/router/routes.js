@@ -38,6 +38,15 @@ const frameIn = [
                 },
                 component: () => import('@/pages/system/role')
             },
+            {
+                path: 'setting/user',
+                name: 'setting-user',
+                meta: {
+                    title: '用户',
+                    auth: true
+                },
+                component: () => import('@/pages/system/user')
+            },
             // 刷新页面 必须保留
             {
                 path: 'refresh',

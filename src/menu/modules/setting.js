@@ -13,6 +13,10 @@ export default {
         {
             path: `${pre}user`,
             title: '用户'
+        },
+        {
+            path: `${pre}menu`,
+            title: '菜单管理'
         }
     ]
 }

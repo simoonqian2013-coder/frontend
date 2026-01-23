@@ -47,6 +47,15 @@ const frameIn = [
                 },
                 component: () => import('@/pages/system/user')
             },
+            {
+                path: 'setting/menu',
+                name: 'setting-menu',
+                meta: {
+                    title: '菜单管理',
+                    auth: true
+                },
+                component: () => import('@/pages/system/menu')
+            },
             // 刷新页面 必须保留
             {
                 path: 'refresh',

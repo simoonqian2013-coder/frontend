@@ -8,6 +8,13 @@ export function RoleList (params) {
     });
 }
 
+export function RoleAll () {
+    return request({
+        url: '/api/roles/all',
+        method: 'get'
+    });
+}
+
 export function RoleCreate (data) {
     return request({
         url: '/api/roles',

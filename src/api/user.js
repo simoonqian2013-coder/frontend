@@ -29,3 +29,18 @@ export function UserDelete (id) {
         method: 'delete'
     });
 }
+
+export function UserAssignRoles (data) {
+    return request({
+        url: '/api/users/assign-roles',
+        method: 'post',
+        data
+    });
+}
+
+export function UserRoleIds (id) {
+    return request({
+        url: `/api/users/${id}/roles`,
+        method: 'get'
+    });
+}

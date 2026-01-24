@@ -17,6 +17,7 @@
                     <Button size="small" type="primary" @click="handleEdit(row)">编辑</Button>
                     <Button size="small" class="ivu-ml-8" @click="handleAddChild(row)">新增子菜单</Button>
                     <Button size="small" type="error" class="ivu-ml-8" @click="handleDelete(row)">删除</Button>
+                    <Button size="small" class="ivu-ml-8" @click="handleAssignRoles(row)">分配角色</Button>
                 </template>
             </Table>
         </Card>
@@ -62,11 +63,39 @@
                 <Button type="primary" :loading="modalLoading" @click="handleSubmit">保存</Button>
             </div>
         </Modal>
+
+        <Drawer
+            title="分配角色"
+            v-model="roleDrawerVisible"
+            width="420"
+            :closable="true"
+            :mask-closable="false"
+        >
+            <div class="ivu-mb">
+                <div class="ivu-mb-8">菜单：{{ currentMenuTitle }}</div>
+                <div class="role-list">
+                    <CheckboxGroup v-model="checkedRoleIds">
+                        <Checkbox
+                            v-for="role in roleOptions"
+                            :key="role.id"
+                            :label="role.id"
+                        >
+                            {{ role.name }} ({{ role.code }})
+                        </Checkbox>
+                    </CheckboxGroup>
+                </div>
+            </div>
+            <div class="drawer-footer">
+                <Button @click="roleDrawerVisible = false">取消</Button>
+                <Button type="primary" :loading="roleDrawerLoading" class="ivu-ml-8" @click="handleSaveRoles">保存</Button>
+            </div>
+        </Drawer>
     </div>
 </template>
 
 <script>
-    import { MenuList, MenuCreate, MenuUpdate, MenuDelete } from '@api/menu';
+    import { MenuList, MenuCreate, MenuUpdate, MenuDelete, MenuAssignRoles, MenuRoleIds } from '@api/menu';
+    import { RoleAll } from '@api/role';
     import { Modal } from 'view-design';
 
     const defaultForm = () => ({
@@ -93,11 +122,17 @@
                     { title: 'Header', key: 'header', width: 120 },
                     { title: '排序', key: 'sort', width: 80 },
                     { title: '状态', slot: 'status', width: 100 },
-                    { title: '操作', slot: 'actions', width: 260, align: 'center' }
+                    { title: '操作', slot: 'actions', width: 340, align: 'center' }
                 ],
                 modalVisible: false,
                 modalMode: 'create',
                 modalLoading: false,
+                roleDrawerVisible: false,
+                roleDrawerLoading: false,
+                roleOptions: [],
+                checkedRoleIds: [],
+                currentMenuId: null,
+                currentMenuTitle: '',
                 formModel: defaultForm(),
                 rules: {
                     title: [{ required: true, message: '请输入名称', trigger: 'blur' }],
@@ -180,6 +215,34 @@
                     }
                 });
             },
+            handleAssignRoles (row) {
+                this.currentMenuId = row.id;
+                this.currentMenuTitle = row.title;
+                this.roleDrawerVisible = true;
+                this.roleDrawerLoading = true;
+                Promise.all([RoleAll(), MenuRoleIds(row.id)])
+                    .then(([roles, selectedIds]) => {
+                        this.roleOptions = Array.isArray(roles) ? roles : [];
+                        this.checkedRoleIds = Array.isArray(selectedIds) ? selectedIds : [];
+                    })
+                    .finally(() => {
+                        this.roleDrawerLoading = false;
+                    });
+            },
+            handleSaveRoles () {
+                if (!this.currentMenuId) return;
+                this.roleDrawerLoading = true;
+                MenuAssignRoles({
+                    menuId: this.currentMenuId,
+                    roleIds: this.checkedRoleIds
+                })
+                    .then(() => {
+                        this.roleDrawerVisible = false;
+                    })
+                    .finally(() => {
+                        this.roleDrawerLoading = false;
+                    });
+            },
             handleSubmit () {
                 this.$refs.menuForm.validate(valid => {
                     if (!valid) return;
@@ -209,3 +272,19 @@
         }
     };
 </script>
+
+<style scoped>
+    .role-list {
+        max-height: 320px;
+        overflow: auto;
+        border: 1px solid #e8eaec;
+        border-radius: 4px;
+        padding: 8px 12px;
+    }
+
+    .drawer-footer {
+        text-align: right;
+        padding-top: 8px;
+        border-top: 1px solid #e8eaec;
+    }
+</style>

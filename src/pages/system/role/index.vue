@@ -93,7 +93,7 @@
 
 <script>
     import { RoleList, RoleCreate, RoleUpdate, RoleDelete, RoleAssignPermissions, RolePermissionIds } from '@api/role';
-    import { PermissionList } from '@api/permission';
+    import { PermissionTree } from '@api/permission';
     import { Modal } from 'view-design';
 
     const defaultForm = () => ({
@@ -131,7 +131,7 @@
                 formModel: defaultForm(),
                 drawerVisible: false,
                 drawerLoading: false,
-                permissions: [],
+                permissionTreeData: [],
                 checkedPermissionIds: [],
                 currentRoleId: null,
                 currentRoleName: '',
@@ -147,112 +147,31 @@
                 return this.modalMode === 'create' ? '创建角色' : '编辑角色';
             },
             permissionTree () {
-                return this.buildPermissionTree(this.permissions, this.checkedPermissionIds);
+                return this.applyCheckedTree(this.permissionTreeData, this.checkedPermissionIds);
             }
         },
         created () {
             this.fetchRoles();
         },
         methods: {
-            buildPermissionTree (permissions, checkedIds) {
+            applyCheckedTree (nodes, checkedIds) {
                 const checkedSet = new Set(checkedIds || []);
-                const menuPermissions = [];
-                const actionPermissions = [];
-                (permissions || []).forEach(item => {
-                    if (item.code && item.code.startsWith('menu:')) {
-                        menuPermissions.push(item);
-                    } else {
-                        actionPermissions.push(item);
-                    }
-                });
-
-                const menuRoot = {
-                    title: '菜单权限',
-                    id: 'menu-root',
-                    expand: true,
-                    children: this.buildMenuTree(menuPermissions, checkedSet)
-                };
-                const actionRoot = {
-                    title: '操作权限',
-                    id: 'action-root',
-                    expand: true,
-                    children: actionPermissions.map(item => ({
-                        title: `${item.name} (${item.code})`,
-                        id: item.id,
-                        checked: checkedSet.has(item.id)
-                    }))
-                };
-
-                const tree = [];
-                if (menuRoot.children.length) tree.push(menuRoot);
-                if (actionRoot.children.length) tree.push(actionRoot);
-                return tree;
-            },
-            buildMenuTree (menuPermissions, checkedSet) {
-                const root = {};
-                const ensureNode = (map, key, title, id) => {
-                    if (!map[key]) {
-                        map[key] = {
-                            title,
-                            id,
-                            expand: true,
-                            children: []
-                        };
-                    }
-                    return map[key];
-                };
-                const topLevel = [];
-
-                menuPermissions.forEach(item => {
-                    const parts = item.code.replace('menu:', '').split(':');
-                    if (!parts.length) return;
-                    const topKey = parts[0];
-                    const topNode = ensureNode(root, topKey, item.name || topKey, `menu-${topKey}`);
-                    if (!topLevel.includes(topNode)) topLevel.push(topNode);
-                    if (parts.length === 1) {
-                        topNode.title = `${item.name} (${item.code})`;
-                        topNode.id = item.id;
-                        topNode.checked = checkedSet.has(item.id);
-                        return;
-                    }
-                    let parent = topNode;
-                    for (let i = 1; i < parts.length; i += 1) {
-                        const codePath = `menu:${parts.slice(0, i + 1).join(':')}`;
-                        const label = item.code === codePath ? `${item.name} (${item.code})` : parts[i];
-                        let child = parent.children.find(node => node._codePath === codePath);
-                        if (!child) {
-                            child = {
-                                title: label,
-                                id: item.code === codePath ? item.id : `menu-${codePath}`,
-                                expand: true,
-                                children: [],
-                                _codePath: codePath
-                            };
-                            parent.children.push(child);
-                        }
-                        if (item.code === codePath) {
-                            child.title = `${item.name} (${item.code})`;
-                            child.id = item.id;
-                            child.checked = checkedSet.has(item.id);
-                        }
-                        parent = child;
-                    }
-                });
-
-                const clean = nodes => nodes.map(node => {
+                const clone = items => (items || []).map(item => {
                     const next = {
-                        title: node.title,
-                        id: node.id,
-                        expand: node.expand
+                        id: item.id,
+                        title: item.title,
+                        expand: item.expand,
+                        disabled: item.disabled
                     };
-                    if (node.checked) next.checked = true;
-                    if (node.children && node.children.length) {
-                        next.children = clean(node.children);
+                    if (checkedSet.has(item.id)) {
+                        next.checked = true;
+                    }
+                    if (item.children && item.children.length) {
+                        next.children = clone(item.children);
                     }
                     return next;
                 });
-
-                return clean(topLevel);
+                return clone(nodes);
             },
             fetchRoles () {
                 this.loading = true;
@@ -348,9 +267,9 @@
                 this.currentRoleName = row.name;
                 this.drawerVisible = true;
                 this.drawerLoading = true;
-                Promise.all([PermissionList(), RolePermissionIds(row.id)])
-                    .then(([permissions, selectedIds]) => {
-                        this.permissions = Array.isArray(permissions) ? permissions : [];
+                Promise.all([PermissionTree(), RolePermissionIds(row.id)])
+                    .then(([treeData, selectedIds]) => {
+                        this.permissionTreeData = Array.isArray(treeData) ? treeData : [];
                         this.checkedPermissionIds = Array.isArray(selectedIds) ? selectedIds : [];
                     })
                     .finally(() => {

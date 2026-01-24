@@ -36,3 +36,18 @@ export function MenuDelete (id) {
         method: 'delete'
     });
 }
+
+export function MenuRoleIds (id) {
+    return request({
+        url: `/api/menus/${id}/roles`,
+        method: 'get'
+    });
+}
+
+export function MenuAssignRoles (data) {
+    return request({
+        url: '/api/menus/assign-roles',
+        method: 'post',
+        data
+    });
+}

@@ -6,3 +6,10 @@ export function PermissionList () {
         method: 'get'
     });
 }
+
+export function PermissionTree () {
+    return request({
+        url: '/api/permissions/tree',
+        method: 'get'
+    });
+}

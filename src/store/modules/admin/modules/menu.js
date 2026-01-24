@@ -29,17 +29,21 @@ import { includeArray } from '@/libs/system';
 // 根据 menu 配置的权限，过滤菜单
 function filterMenu (menuList, access, lastList) {
     menuList.forEach(menu => {
-        let menuAccess = menu.auth;
+        const menuAccess = menu.auth;
+        const children = [];
 
-        if (!menuAccess || includeArray(menuAccess, access)) {
+        if (menu.children && menu.children.length) {
+            filterMenu(menu.children, access, children);
+        }
+
+        if (!menuAccess || includeArray(menuAccess, access) || children.length) {
             let newMenu = {};
             for (let i in menu) {
                 if (i !== 'children') newMenu[i] = cloneDeep(menu[i]);
             }
-            if (menu.children && menu.children.length) newMenu.children = [];
+            if (children.length) newMenu.children = children;
 
             lastList.push(newMenu);
-            menu.children && filterMenu(menu.children, access, newMenu.children);
         }
     });
     return lastList;

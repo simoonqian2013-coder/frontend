@@ -2,6 +2,28 @@
  * 菜单
  * */
 import { cloneDeep } from 'lodash';
+import util from '@/libs/util';
+import { MenuCurrent } from '@api/menu';
+
+function buildHeaderMenu (menuList) {
+    const headers = [];
+    const headerMap = {};
+    (menuList || []).forEach(menu => {
+        if (!menu || !menu.header) return;
+        if (menu.parentId) return;
+        if (!headerMap[menu.header]) {
+            headerMap[menu.header] = true;
+            headers.push({
+                path: menu.path,
+                title: menu.header,
+                icon: menu.icon || 'md-menu',
+                hideSider: false,
+                name: menu.header
+            });
+        }
+    });
+    return headers;
+}
 import { includeArray } from '@/libs/system';
 
 // 根据 menu 配置的权限，过滤菜单
@@ -30,12 +52,35 @@ export default {
         header: [],
         // 侧栏菜单
         sider: [],
+        // 全量侧栏菜单
+        siderAll: [],
         // 当前顶栏菜单的 name
         headerName: '',
         // 当前所在菜单的 path
         activePath: '',
         // 展开的子菜单 name 集合
         openNames: []
+    },
+    actions: {
+        /**
+         * @description 从后端加载菜单
+         */
+        loadFromServer ({ commit }) {
+            const token = util.cookies.get('token');
+            if (!token) return Promise.resolve();
+            return MenuCurrent().then(menu => {
+                const list = Array.isArray(menu) ? menu : [];
+                commit('setSiderAll', list);
+                if (!list.length) {
+                    commit('setSider', []);
+                } else {
+                    const headers = buildHeaderMenu(list);
+                    if (headers.length) {
+                        commit('setHeader', headers);
+                    }
+                }
+            });
+        }
     },
     getters: {
         /**
@@ -96,6 +141,14 @@ export default {
          */
         setSider (state, menu) {
             state.sider = menu;
+        },
+        /**
+         * @description 设置全量侧边栏菜单
+         * @param {Object} state vuex state
+         * @param {Array} menu menu
+         */
+        setSiderAll (state, menu) {
+            state.siderAll = menu;
         },
         /**
          * @description 设置顶栏菜单

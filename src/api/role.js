@@ -30,3 +30,18 @@ export function RoleDelete (id) {
         method: 'delete'
     });
 }
+
+export function RoleAssignPermissions (data) {
+    return request({
+        url: '/api/roles/assign-permissions',
+        method: 'post',
+        data
+    });
+}
+
+export function RolePermissionIds (id) {
+    return request({
+        url: `/api/roles/${id}/permissions`,
+        method: 'get'
+    });
+}

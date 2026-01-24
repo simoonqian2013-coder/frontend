@@ -21,7 +21,6 @@ import iViewPro from '@/libs/iview-pro/iview-pro.min.js';
 // 菜单和路由
 import router from './router';
 import menuHeader from '@/menu/header';
-import menuSider from '@/menu/sider';
 import { frameInRoutes } from '@/router/routes';
 
 // 多语言
@@ -54,37 +53,44 @@ new Vue({
     store,
     i18n,
     render: h => h(App),
+    methods: {
+        syncMenuByRoute (route) {
+            let path = route.matched[route.matched.length - 1].path;
+            const menuList = this.$store.state.admin.menu.siderAll || [];
+            let headerName = getHeaderName(path, menuList);
+            if (headerName === null) {
+                path = route.path;
+                headerName = getHeaderName(path, menuList);
+            }
+            if (headerName !== null) {
+                this.$store.commit('admin/menu/setHeaderName', headerName);
+                const filterMenuSider = getMenuSider(menuList, headerName);
+                this.$store.commit('admin/menu/setSider', filterMenuSider);
+                this.$store.commit('admin/menu/setActivePath', route.path);
+                const openNames = getSiderSubmenu(path, menuList);
+                this.$store.commit('admin/menu/setOpenNames', openNames);
+            }
+        }
+    },
     created () {
         // 处理路由 得到每一级的路由设置
         this.$store.commit('admin/page/init', frameInRoutes);
         // 设置顶栏菜单
         this.$store.commit('admin/menu/setHeader', menuHeader);
         // 加载用户登录的数据
-        this.$store.dispatch('admin/account/load');
+        this.$store.dispatch('admin/account/load').then(() => {
+            this.$store.dispatch('admin/menu/loadFromServer').then(() => {
+                this.syncMenuByRoute(this.$route);
+            });
+        });
         // 初始化全屏监听
         this.$store.dispatch('admin/layout/listenFullscreen')
     },
     watch: {
         // 监听路由 控制侧边栏显示 标记当前顶栏菜单（如需要）
         '$route' (to, from) {
-            let path = to.matched[to.matched.length - 1].path;
             if (!Setting.dynamicSiderMenu) {
-                let headerName = getHeaderName(path, menuSider);
-                if (headerName === null) {
-                    path = to.path;
-                    headerName = getHeaderName(path, menuSider);
-                }
-                // 在 404 时，是没有 headerName 的
-                if (headerName !== null) {
-                    this.$store.commit('admin/menu/setHeaderName', headerName);
-
-                    const filterMenuSider = getMenuSider(menuSider, headerName);
-                    this.$store.commit('admin/menu/setSider', filterMenuSider);
-                    this.$store.commit('admin/menu/setActivePath', to.path);
-
-                    const openNames = getSiderSubmenu(path, menuSider);
-                    this.$store.commit('admin/menu/setOpenNames', openNames);
-                }
+                this.syncMenuByRoute(to);
             }
             this.appRouteChange(to, from);
         }

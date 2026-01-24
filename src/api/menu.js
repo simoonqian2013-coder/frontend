@@ -7,6 +7,13 @@ export function MenuList () {
     });
 }
 
+export function MenuCurrent () {
+    return request({
+        url: '/api/menus/current',
+        method: 'get'
+    });
+}
+
 export function MenuCreate (data) {
     return request({
         url: '/api/menus',

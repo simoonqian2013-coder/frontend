@@ -56,6 +56,24 @@ const frameIn = [
                 },
                 component: () => import('@/pages/system/menu')
             },
+            {
+                path: 'pets/list',
+                name: 'pets-list',
+                meta: {
+                    title: '宠物列表',
+                    auth: true
+                },
+                component: () => import('@/pages/pet/list')
+            },
+            {
+                path: 'adopt-review/list',
+                name: 'adopt-review-list',
+                meta: {
+                    title: '领养审核',
+                    auth: true
+                },
+                component: () => import('@/pages/adopt-review/list')
+            },
             // 刷新页面 必须保留
             {
                 path: 'refresh',

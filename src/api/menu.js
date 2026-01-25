@@ -44,9 +44,31 @@ export function MenuRoleIds (id) {
     });
 }
 
+export function MenuPermissionIds (id) {
+    return request({
+        url: `/api/menus/${id}/permissions`,
+        method: 'get'
+    });
+}
+
+export function MenuPermissionDetails (id) {
+    return request({
+        url: `/api/menus/${id}/permissions/details`,
+        method: 'get'
+    });
+}
+
 export function MenuAssignRoles (data) {
     return request({
         url: '/api/menus/assign-roles',
+        method: 'post',
+        data
+    });
+}
+
+export function MenuAssignPermissions (data) {
+    return request({
+        url: '/api/menus/assign-permissions',
         method: 'post',
         data
     });

@@ -2,18 +2,15 @@
     <div class="i-table-no-border">
         <Card :bordered="false" dis-hover>
             <div slot="title">
-                <Icon type="md-clipboard" size="16" />
-                <span class="ivu-pl-8">领养审核</span>
+                <Icon type="md-document" size="16" />
+                <span class="ivu-pl-8">领养申请</span>
             </div>
             <div slot="extra">
                 <Button type="primary" @click="fetchList">刷新</Button>
             </div>
             <Form inline :label-width="60" class="ivu-mb">
-                <FormItem label="关键字">
-                    <Input v-model="query.keyword" placeholder="宠物/申请人/手机号" clearable />
-                </FormItem>
                 <FormItem label="状态">
-                    <Select v-model="query.status" clearable style="width: 120px;">
+                    <Select v-model="query.status" clearable style="width: 140px;">
                         <Option :value="0">待审核</Option>
                         <Option :value="1">已通过</Option>
                         <Option :value="2">已拒绝</Option>
@@ -32,15 +29,6 @@
                 </template>
                 <template slot-scope="{ row }" slot="actions">
                     <Button size="small" type="primary" @click="handleView(row)">查看</Button>
-                    <Button
-                        size="small"
-                        class="ivu-ml-8"
-                        type="warning"
-                        :disabled="row.status !== 0"
-                        @click="handleReview(row)"
-                    >
-                        审核
-                    </Button>
                 </template>
             </Table>
             <div class="ivu-mt">
@@ -73,41 +61,17 @@
                 </div>
             </div>
         </Drawer>
-
-        <Modal v-model="reviewVisible" title="领养审核" :mask-closable="false">
-            <Form ref="reviewForm" :model="reviewForm" :rules="reviewRules" label-width="80">
-                <FormItem label="结果" prop="status">
-                    <RadioGroup v-model="reviewForm.status">
-                        <Radio :label="1">通过</Radio>
-                        <Radio :label="2">拒绝</Radio>
-                    </RadioGroup>
-                </FormItem>
-                <FormItem label="备注" prop="remark">
-                    <Input v-model="reviewForm.remark" type="textarea" :rows="3" placeholder="审核意见/拒绝原因" />
-                </FormItem>
-            </Form>
-            <div slot="footer">
-                <Button @click="reviewVisible = false">取消</Button>
-                <Button type="primary" :loading="reviewLoading" @click="submitReview">提交</Button>
-            </div>
-        </Modal>
     </div>
 </template>
 
 <script>
-    import { AdoptionList, AdoptionReview } from '@api/adoption';
-
-    const defaultReviewForm = () => ({
-        status: 1,
-        remark: ''
-    });
+    import { AdoptionMyList } from '@api/adoption';
 
     export default {
-        name: 'adopt-review-list',
+        name: 'pet-applications',
         data () {
             return {
                 query: {
-                    keyword: '',
                     status: null,
                     page: 1,
                     size: 10
@@ -116,18 +80,14 @@
                 allList: [],
                 columns: [
                     { title: 'ID', key: 'id', width: 80 },
-                    { title: '申请人', key: 'applicantName', minWidth: 120 },
+                    { title: '宠物名称', key: 'petNickname', minWidth: 140 },
                     { title: '手机号', key: 'phone', minWidth: 140 },
-                    { title: '宠物名称', key: 'petNickname', minWidth: 160 },
                     { title: '提交时间', key: 'createdAt', minWidth: 160 },
                     { title: '状态', slot: 'status', width: 100 },
-                    { title: '操作', slot: 'actions', width: 160, align: 'center' }
+                    { title: '操作', slot: 'actions', width: 120, align: 'center' }
                 ],
                 detailVisible: false,
-                reviewVisible: false,
-                reviewLoading: false,
                 currentRow: null,
-                reviewForm: defaultReviewForm(),
                 typeOptions: [
                     { label: '猫', value: 'CAT' },
                     { label: '狗', value: 'DOG' }
@@ -139,18 +99,18 @@
             };
         },
         computed: {
+            filteredList () {
+                if (this.query.status === null || this.query.status === undefined) {
+                    return this.allList;
+                }
+                return this.allList.filter(item => item.status === this.query.status);
+            },
             total () {
-                return this.allList.length;
+                return this.filteredList.length;
             },
             tableData () {
                 const start = (this.query.page - 1) * this.query.size;
-                return this.allList.slice(start, start + this.query.size);
-            },
-            reviewRules () {
-                return {
-                    status: [{ required: true, type: 'number', message: '请选择审核结果', trigger: 'change' }],
-                    remark: [{ validator: this.validateRemark, trigger: 'blur' }]
-                };
+                return this.filteredList.slice(start, start + this.query.size);
             }
         },
         created () {
@@ -159,10 +119,7 @@
         methods: {
             fetchList () {
                 this.loading = true;
-                AdoptionList({
-                    keyword: this.query.keyword,
-                    status: this.query.status
-                })
+                AdoptionMyList()
                     .then(res => {
                         this.allList = Array.isArray(res) ? res : [];
                         this.ensurePageInRange();
@@ -179,13 +136,12 @@
             },
             handleSearch () {
                 this.query.page = 1;
-                this.fetchList();
+                this.ensurePageInRange();
             },
             handleReset () {
-                this.query.keyword = '';
                 this.query.status = null;
                 this.query.page = 1;
-                this.fetchList();
+                this.ensurePageInRange();
             },
             handlePageChange (page) {
                 this.query.page = page;
@@ -198,36 +154,6 @@
             handleView (row) {
                 this.currentRow = row;
                 this.detailVisible = true;
-            },
-            handleReview (row) {
-                this.currentRow = row;
-                this.reviewForm = defaultReviewForm();
-                this.reviewVisible = true;
-            },
-            submitReview () {
-                if (!this.currentRow) return;
-                this.$refs.reviewForm.validate(valid => {
-                    if (!valid) return;
-                    this.reviewLoading = true;
-                    AdoptionReview(this.currentRow.id, {
-                        status: this.reviewForm.status,
-                        remark: this.reviewForm.remark
-                    })
-                        .then(() => {
-                            this.reviewVisible = false;
-                            this.fetchList();
-                        })
-                        .finally(() => {
-                            this.reviewLoading = false;
-                        });
-                });
-            },
-            validateRemark (rule, value, callback) {
-                if (this.reviewForm.status === 2 && (!value || !value.trim())) {
-                    callback(new Error('拒绝时必须填写原因'));
-                    return;
-                }
-                callback();
             },
             formatType (value) {
                 const item = this.typeOptions.find(option => option.value === value);

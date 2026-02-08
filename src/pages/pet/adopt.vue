@@ -46,7 +46,7 @@
                 >
                     <Card dis-hover class="pet-card">
                         <div class="cover">
-                            <img :src="pet.image || defaultImage" alt="pet" />
+                            <img :src="getMainImageUrl(pet) || defaultImage" alt="pet" />
                             <div class="badge">可领养</div>
                         </div>
                         <div class="info">
@@ -89,7 +89,7 @@
 
         <Drawer v-model="detailVisible" width="520" title="宠物详情" :closable="true">
             <div v-if="currentPet">
-                <img :src="currentPet.image || defaultImage" class="detail-cover" alt="pet" />
+                <img :src="getMainImageUrl(currentPet) || defaultImage" class="detail-cover" alt="pet" />
                 <div class="detail-item"><span>昵称：</span>{{ currentPet.nickname }}</div>
                 <div class="detail-item"><span>品种：</span>{{ currentPet.breed || '-' }}</div>
                 <div class="detail-item"><span>类型：</span>{{ formatType(currentPet.type) }}</div>
@@ -265,6 +265,12 @@
             formatGender (value) {
                 const item = this.genderOptions.find(option => option.value === value);
                 return item ? item.label : value || '-';
+            },
+            getMainImageUrl (pet) {
+                if (!pet) return '';
+                const list = Array.isArray(pet.imageUrls) ? pet.imageUrls : [];
+                const mainItem = list.find(item => item && item.isMain);
+                return (mainItem && mainItem.url) || (list[0] && list[0].url) || pet.image || '';
             },
             openDetail (pet) {
                 this.currentPet = pet;

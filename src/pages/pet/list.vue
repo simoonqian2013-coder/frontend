@@ -31,6 +31,12 @@
                 </FormItem>
             </Form>
             <Table :columns="columns" :data="tableData" :loading="loading">
+                <template slot-scope="{ row }" slot="image">
+                    <div class="thumb-cell">
+                        <img v-if="getMainImageUrl(row)" :src="getMainImageUrl(row)" alt="pet" />
+                        <span v-else class="thumb-empty">-</span>
+                    </div>
+                </template>
                 <template slot-scope="{ row }" slot="type">
                     {{ formatType(row.type) }}
                 </template>
@@ -94,7 +100,55 @@
                     <Input v-model="formModel.detail" type="textarea" :rows="3" placeholder="详情描述" />
                 </FormItem>
                 <FormItem label="图片">
-                    <Input v-model="formModel.image" placeholder="图片地址" />
+                    <Upload
+                        :action="uploadAction"
+                        :headers="uploadHeaders"
+                        :format="uploadFormats"
+                        :max-size="uploadMaxSize"
+                        :multiple="true"
+                        :show-upload-list="false"
+                        :on-success="handleUploadSuccess"
+                        :on-error="handleUploadError"
+                        :on-format-error="handleUploadFormatError"
+                        :on-exceeded-size="handleUploadMaxSize"
+                    >
+                        <Button icon="md-cloud-upload">上传图片</Button>
+                    </Upload>
+                    <div class="image-list" v-if="formModel.imageUrls.length">
+                        <div class="image-item" v-for="(item, index) in formModel.imageUrls" :key="item.url + index">
+                            <img :src="item.url" alt="pet" />
+                            <div class="image-actions">
+                                <Tag color="blue" v-if="item.isMain">主图</Tag>
+                                <Button
+                                    v-else
+                                    size="small"
+                                    type="text"
+                                    class="image-action"
+                                    @click="setMainImage(index)"
+                                >设为主图</Button>
+                                <Button
+                                    size="small"
+                                    type="text"
+                                    class="image-action"
+                                    @click="moveImage(index, -1)"
+                                    :disabled="index === 0"
+                                >上移</Button>
+                                <Button
+                                    size="small"
+                                    type="text"
+                                    class="image-action"
+                                    @click="moveImage(index, 1)"
+                                    :disabled="index === formModel.imageUrls.length - 1"
+                                >下移</Button>
+                                <Button
+                                    size="small"
+                                    type="text"
+                                    class="image-action image-remove"
+                                    @click="removeImage(index)"
+                                >删除</Button>
+                            </div>
+                        </div>
+                    </div>
                 </FormItem>
                 <FormItem label="状态" prop="status">
                     <Select v-model="formModel.status">
@@ -113,7 +167,9 @@
 
 <script>
     import { PetList, PetCreate, PetUpdate, PetDelete } from '@api/pet';
-    import { Modal } from 'view-design';
+    import Setting from '@/setting';
+    import util from '@/libs/util';
+    import { Message, Modal } from 'view-design';
 
     const defaultForm = () => ({
         id: null,
@@ -126,6 +182,7 @@
         address: '',
         detail: '',
         image: '',
+        imageUrls: [],
         status: 1
     });
 
@@ -144,6 +201,7 @@
                 allPets: [],
                 columns: [
                     { title: 'ID', key: 'id', width: 80 },
+                    { title: '缩略图', slot: 'image', width: 100, align: 'center' },
                     { title: '昵称', key: 'nickname', minWidth: 140 },
                     { title: '品种', key: 'breed', minWidth: 140 },
                     { title: '类型', slot: 'type', width: 100 },
@@ -158,6 +216,9 @@
                 modalMode: 'create',
                 modalLoading: false,
                 formModel: defaultForm(),
+                uploadAction: `${Setting.apiBaseURL}api/pets/images`,
+                uploadFormats: ['jpg', 'jpeg', 'png', 'webp'],
+                uploadMaxSize: 2048,
                 typeOptions: [
                     { label: '猫', value: 'CAT' },
                     { label: '狗', value: 'DOG' }
@@ -185,6 +246,10 @@
                     type: [{ required: true, message: '请选择类型', trigger: 'change' }],
                     status: [{ required: true, type: 'number', message: '请选择状态', trigger: 'change' }]
                 };
+            },
+            uploadHeaders () {
+                const token = util.cookies.get('token');
+                return token ? { Authorization: `Bearer ${token}` } : {};
             }
         },
         created () {
@@ -249,6 +314,7 @@
                     address: row.address,
                     detail: row.detail,
                     image: row.image,
+                    imageUrls: this.normalizeImageUrls(row),
                     status: row.status
                 };
                 this.modalVisible = true;
@@ -277,7 +343,8 @@
                         city: this.formModel.city,
                         address: this.formModel.address,
                         detail: this.formModel.detail,
-                        image: this.formModel.image,
+                        image: this.getMainImageUrl(this.formModel),
+                        imageUrls: this.formModel.imageUrls,
                         status: this.formModel.status
                     };
                     const request = this.modalMode === 'create'
@@ -300,7 +367,137 @@
             formatGender (value) {
                 const item = this.genderOptions.find(option => option.value === value);
                 return item ? item.label : value || '-';
+            },
+            normalizeImageUrls (row) {
+                if (Array.isArray(row.imageUrls) && row.imageUrls.length) {
+                    return row.imageUrls.map(item => ({
+                        url: item.url,
+                        isMain: Boolean(item.isMain)
+                    }));
+                }
+                if (row.image) {
+                    return [{ url: row.image, isMain: true }];
+                }
+                return [];
+            },
+            getMainImageUrl (row) {
+                const list = Array.isArray(row.imageUrls) ? row.imageUrls : [];
+                const mainItem = list.find(item => item && item.isMain);
+                return (mainItem && mainItem.url) || (list[0] && list[0].url) || row.image || '';
+            },
+            handleUploadSuccess (response, file) {
+                const url = (response && response.url)
+                    || (response && response.data && response.data.url)
+                    || (response && response.data && response.data[0] && response.data[0].url);
+                if (!url) {
+                    Message.error('上传失败：未返回图片地址');
+                    return;
+                }
+                const newItem = { url, isMain: false };
+                this.formModel.imageUrls.push(newItem);
+                this.ensureMainImage();
+            },
+            handleUploadError () {
+                Message.error('上传失败，请稍后重试');
+            },
+            handleUploadFormatError () {
+                Message.warning('图片格式不支持，请上传 jpg/png/webp');
+            },
+            handleUploadMaxSize () {
+                Message.warning('图片大小不能超过 2MB');
+            },
+            setMainImage (index) {
+                this.formModel.imageUrls = this.formModel.imageUrls.map((item, idx) => ({
+                    ...item,
+                    isMain: idx === index
+                }));
+            },
+            moveImage (index, delta) {
+                const target = index + delta;
+                if (target < 0 || target >= this.formModel.imageUrls.length) return;
+                const list = [...this.formModel.imageUrls];
+                const temp = list[index];
+                list[index] = list[target];
+                list[target] = temp;
+                this.formModel.imageUrls = list;
+            },
+            removeImage (index) {
+                this.formModel.imageUrls.splice(index, 1);
+                this.ensureMainImage();
+            },
+            ensureMainImage () {
+                const list = this.formModel.imageUrls;
+                if (!list.length) return;
+                const hasMain = list.some(item => item.isMain);
+                if (!hasMain) {
+                    list[0].isMain = true;
+                }
             }
         }
     };
 </script>
+
+<style scoped>
+    .image-list {
+        margin-top: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .image-item {
+        width: 140px;
+        border: 1px solid #e8eaec;
+        border-radius: 4px;
+        overflow: hidden;
+        background: #fff;
+    }
+
+    .image-item img {
+        width: 100%;
+        height: 100px;
+        object-fit: cover;
+        display: block;
+        background: #f5f5f5;
+    }
+
+    .image-actions {
+        padding: 6px 8px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+    }
+
+    .image-action {
+        padding: 0;
+    }
+
+    .image-remove {
+        color: #ed4014;
+    }
+
+    .thumb-cell {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto;
+        border-radius: 4px;
+        overflow: hidden;
+        background: #f5f5f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .thumb-cell img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .thumb-empty {
+        color: #999;
+        font-size: 12px;
+    }
+</style>

@@ -8,11 +8,11 @@
                 <div class="hero-mascot">
                     <img src="@/assets/images/login-mascot.png" alt="宠物之家" />
                 </div>
-                <div class="hero-title">欢迎来到宠物之家</div>
+                <div class="hero-title">欢迎来到宠物领养救助之家</div>
                 <div class="hero-subtitle">您的关爱，我们的使命</div>
             </div>
             <div class="page-account-form">
-                <div class="form-title">宠物之家</div>
+                <div class="form-title">宠物领养救助之家</div>
                 <div class="form-subtitle">PET HOME</div>
                 <div class="form-welcome">欢迎回来！</div>
                 <Login @on-submit="handleSubmit">

@@ -1,8 +1,8 @@
 <template>
     <div class="dashboard-console">
-        <Row :gutter="16">
-            <Col :xs="24" :sm="12" :md="6">
-                <Card>
+        <Row :gutter="16" class="stats-row">
+            <Col :xs="24" :sm="12" :md="6" class="card-col">
+                <Card class="fill-card">
                     <div class="stat-card">
                         <div class="stat-title">今日新增宠物</div>
                         <div class="stat-value">{{ stats.todayNewPets }}</div>
@@ -10,8 +10,8 @@
                     </div>
                 </Card>
             </Col>
-            <Col :xs="24" :sm="12" :md="6">
-                <Card>
+            <Col :xs="24" :sm="12" :md="6" class="card-col">
+                <Card class="fill-card">
                     <div class="stat-card">
                         <div class="stat-title">待审核领养</div>
                         <div class="stat-value">{{ stats.pendingAdoptions }}</div>
@@ -19,8 +19,8 @@
                     </div>
                 </Card>
             </Col>
-            <Col :xs="24" :sm="12" :md="6">
-                <Card>
+            <Col :xs="24" :sm="12" :md="6" class="card-col">
+                <Card class="fill-card">
                     <div class="stat-card">
                         <div class="stat-title">本月通过领养</div>
                         <div class="stat-value">{{ stats.monthApprovedAdoptions }}</div>
@@ -28,8 +28,8 @@
                     </div>
                 </Card>
             </Col>
-            <Col :xs="24" :sm="12" :md="6">
-                <Card>
+            <Col :xs="24" :sm="12" :md="6" class="card-col">
+                <Card class="fill-card">
                     <div class="stat-card">
                         <div class="stat-title">在册宠物数</div>
                         <div class="stat-value">{{ stats.totalPets }}</div>
@@ -40,23 +40,23 @@
         </Row>
 
         <Row :gutter="16" class="block-row">
-            <Col :xs="24" :md="16">
+            <Col :xs="24" :md="16" class="card-col">
                 <Card title="待办 · 领养申请">
                     <Table :columns="pendingColumns" :data="pendingData" size="small" />
                     <div class="table-footer">
-                        <Button type="primary" ghost>查看全部申请</Button>
+                        <Button type="primary" ghost @click="goToAdoptionReviewList">查看全部申请</Button>
                     </div>
                 </Card>
             </Col>
-            <Col :xs="24" :md="8">
-                <Card title="提醒">
+            <Col :xs="24" :md="8" class="card-col side-stack">
+                <Card title="提醒" class="fill-card">
                     <ul class="reminder-list">
                         <li><Badge status="error" /> 超过 7 天未处理的申请：{{ reminders.overduePending }}</li>
                         <li><Badge status="warning" /> 缺少主图的宠物：{{ reminders.missingMainImage }}</li>
                         <li><Badge status="processing" /> 领养审核高峰期：{{ reminders.peakTime }}</li>
                     </ul>
                 </Card>
-                <Card title="公告" class="stack-card">
+                <Card title="公告" class="stack-card fill-card">
                     <div class="notice">{{ notice.content }}</div>
                     <div class="notice-meta">更新：{{ notice.updatedBy }} · {{ notice.updatedAt }}</div>
                 </Card>
@@ -64,8 +64,8 @@
         </Row>
 
         <Row :gutter="16" class="block-row">
-            <Col :xs="24" :md="16">
-                <Card title="领养趋势（近 7 天）">
+            <Col :xs="24" :md="16" class="card-col">
+                <Card title="领养趋势（近 7 天）" class="fill-card">
                     <div class="trend">
                         <div class="trend-item" v-for="item in trendData" :key="item.day">
                             <span class="trend-label">{{ item.day }}</span>
@@ -77,8 +77,8 @@
                     </div>
                 </Card>
             </Col>
-            <Col :xs="24" :md="8">
-                <Card title="地区分布">
+            <Col :xs="24" :md="8" class="card-col">
+                <Card title="地区分布" class="fill-card">
                     <ul class="city-list">
                         <li v-for="city in cityData" :key="city.name">
                             <span>{{ city.name }}</span>
@@ -90,8 +90,8 @@
         </Row>
 
         <Row :gutter="16" class="block-row">
-            <Col :xs="24" :md="12">
-                <Card title="最新动态">
+            <Col :xs="24" :md="12" class="card-col">
+                <Card title="最新动态" class="fill-card">
                     <Timeline>
                         <TimelineItem v-for="item in activityData" :key="item.time">
                             <div class="activity-title">{{ item.title }}</div>
@@ -100,24 +100,16 @@
                     </Timeline>
                 </Card>
             </Col>
-            <Col :xs="24" :md="12">
-                <Card title="领养状态概览">
+            <Col :xs="24" :md="12" class="card-col">
+                <Card title="领养状态概览" class="fill-card">
                     <div class="status-grid">
                         <div class="status-item">
                             <span>已领养</span>
                             <strong>{{ statusOverview.adopted }}</strong>
                         </div>
                         <div class="status-item">
-                            <span>领养中</span>
+                            <span>可领养</span>
                             <strong>{{ statusOverview.available }}</strong>
-                        </div>
-                        <div class="status-item">
-                            <span>暂不可领养</span>
-                            <strong>{{ statusOverview.unavailable }}</strong>
-                        </div>
-                        <div class="status-item">
-                            <span>待补充资料</span>
-                            <strong>{{ statusOverview.needInfo }}</strong>
                         </div>
                     </div>
                 </Card>
@@ -154,18 +146,7 @@
                     { title: '申请人', key: 'name', minWidth: 80 },
                     { title: '电话', key: 'phone', minWidth: 110 },
                     { title: '宠物', key: 'pet', minWidth: 80 },
-                    { title: '提交时间', key: 'time', minWidth: 140 },
-                    {
-                        title: '操作',
-                        key: 'action',
-                        width: 140,
-                        render: (h) => {
-                            return h('div', [
-                                h('Button', { props: { type: 'primary', size: 'small' }, style: { marginRight: '6px' } }, '通过'),
-                                h('Button', { props: { type: 'error', size: 'small', ghost: true } }, '拒绝')
-                            ])
-                        }
-                    }
+                    { title: '提交时间', key: 'time', minWidth: 140 }
                 ],
                 pendingData: [],
                 trendData: [],
@@ -197,6 +178,9 @@
                         this.statusOverview = res.statusOverview || this.statusOverview;
                     })
                     .catch(() => {});
+            },
+            goToAdoptionReviewList () {
+                this.$router.push({ name: 'adopt-review-list' });
             }
         }
     }
@@ -205,13 +189,27 @@
 .dashboard-console {
     padding: 8px;
 }
+.card-col {
+    display: flex;
+}
+:deep(.fill-card) {
+    width: 100%;
+    height: 100%;
+}
+:deep(.fill-card .ivu-card-body) {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
 .block-row {
     margin-top: 16px;
 }
 .stat-card {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    justify-content: space-between;
+    gap: 8px;
+    min-height: 86px;
 }
 .stat-title {
     color: #6b7280;
@@ -228,7 +226,13 @@
 }
 .table-footer {
     margin-top: 12px;
+    padding-top: 12px;
     text-align: right;
+    position: relative;
+    z-index: 1;
+}
+.side-stack {
+    flex-direction: column;
 }
 .reminder-list {
     list-style: none;
@@ -317,5 +321,10 @@
 .status-item strong {
     font-size: 20px;
     color: #111827;
+}
+@media (max-width: 768px) {
+    .card-col {
+        display: block;
+    }
 }
 </style>

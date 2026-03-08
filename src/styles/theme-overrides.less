@@ -1,0 +1,122 @@
+@peach-primary: #f36c9e;
+@peach-primary-hover: #f58ab2;
+@peach-primary-active: #e95a90;
+@peach-soft: #fde6ef;
+@sider-dark: #f7b6cc;
+@sider-active: #f9d6e3;
+
+/* Global primary color override */
+.ivu-btn-primary {
+  background-color: @peach-primary !important;
+  border-color: @peach-primary !important;
+}
+
+.ivu-btn-primary:hover,
+.ivu-btn-primary:focus {
+  background-color: @peach-primary-hover !important;
+  border-color: @peach-primary-hover !important;
+}
+
+.ivu-btn-primary:active {
+  background-color: @peach-primary-active !important;
+  border-color: @peach-primary-active !important;
+}
+
+.ivu-btn-primary.ivu-btn-ghost {
+  color: @peach-primary !important;
+  border-color: @peach-primary !important;
+  background-color: transparent !important;
+}
+
+/* Tabs */
+.ivu-tabs-ink-bar {
+  background-color: @peach-primary !important;
+}
+
+.ivu-tabs-tab-active,
+.ivu-tabs-tab:hover {
+  color: @peach-primary !important;
+}
+
+/* Links / interactive text */
+a,
+.ivu-page-header-back:hover,
+.ivu-notifications-tab-loading-more {
+  color: @peach-primary;
+}
+
+/* Sider theme */
+.i-layout-sider-dark {
+  background: @sider-dark !important;
+}
+
+.i-layout-sider-dark .i-layout-sider-logo {
+  background: @sider-dark !important;
+  border-bottom-color: #f3a6bf !important;
+}
+
+.i-layout-sider-dark .i-layout-sider-logo h1,
+.i-layout-sider-dark .i-layout-sider-logo h2,
+.i-layout-sider-dark .i-layout-sider-logo span,
+.i-layout-sider-dark .i-layout-sider-logo a {
+  color: #111111 !important;
+}
+
+.i-layout-sider-dark .ivu-menu-dark {
+  background: @sider-dark !important;
+}
+
+.i-layout-sider-dark .ivu-menu-dark,
+.i-layout-sider-dark .ivu-menu-dark .ivu-menu-item,
+.i-layout-sider-dark .ivu-menu-dark .ivu-menu-submenu-title,
+.i-layout-sider-dark .ivu-menu-dark .ivu-menu-item i,
+.i-layout-sider-dark .ivu-menu-dark .ivu-menu-submenu-title i,
+.i-layout-sider-dark .ivu-menu-dark .ivu-menu-submenu-title .ivu-menu-submenu-title-icon {
+  color: #111111 !important;
+}
+
+.i-layout-sider-dark .ivu-menu-dark.ivu-menu-vertical .ivu-menu-item-active:not(.ivu-menu-submenu),
+.i-layout-sider-dark .ivu-menu-dark.ivu-menu-vertical .ivu-menu-item-active:not(.ivu-menu-submenu):hover,
+.i-layout-sider-dark .ivu-menu-dark.ivu-menu-vertical .ivu-menu-submenu-active > .ivu-menu-submenu-title {
+  background: @sider-active !important;
+  color: #9f3c61 !important;
+}
+
+.i-layout-sider-dark .ivu-menu-dark .ivu-menu-item:hover,
+.i-layout-sider-dark .ivu-menu-dark .ivu-menu-submenu-title:hover {
+  color: #9f3c61 !important;
+  background: #fbe3ec !important;
+}
+
+.i-layout-sider-dark .ivu-menu-dark .ivu-menu-opened {
+  background: #fce7ef !important;
+}
+
+.i-layout-sider-dark .ivu-menu-dark .ivu-menu-opened > .ivu-menu-submenu-title {
+  background: #f9d6e3 !important;
+  color: #9f3c61 !important;
+}
+
+.i-layout-sider-dark .ivu-menu-dark .ivu-menu-opened .ivu-menu {
+  background: #fdeff4 !important;
+}
+
+.i-layout-sider-dark .ivu-menu-dark .ivu-menu-opened .ivu-menu-item {
+  color: #9f3c61 !important;
+}
+
+.i-layout-sider-dark .ivu-menu-dark .ivu-menu-opened .ivu-menu-item-active:not(.ivu-menu-submenu) {
+  background: #fff5f8 !important;
+  color: #d45583 !important;
+}
+
+/* Dropdown / selected highlights */
+.ivu-select-item-selected,
+.ivu-select-item-selected:hover {
+  color: @peach-primary !important;
+}
+
+.ivu-table-row-highlight td,
+.ivu-table-row-hover td {
+  background-color: @peach-soft !important;
+}

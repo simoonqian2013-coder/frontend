@@ -1,6 +1,18 @@
 // 自定义主题
 // 详见 https://www.iviewui.com/docs/guide/theme
-@import '~view-design/src/styles/index.less';
+// 主题主色：桃粉
+@primary-color: #f36c9e;
+@link-color: #f36c9e;
+@info-color: #f36c9e;
+@processing-color: #f36c9e;
+@selected-color: fade(@primary-color, 14%);
 
-@menu-dark-title: #191a23;
-@menu-dark-active-bg: #101117;
+// 侧边栏深色风格同步为纯粉色调
+@menu-dark-title: #c84f7f;
+@menu-dark-active-bg: #e06796;
+@menu-dark-color: #f8e8f0;
+@menu-dark-subsidiary-color: #d8b8c7;
+@menu-dark-active-title: #fff4f8;
+@layout-sider-background: @menu-dark-title;
+
+@import '~view-design/src/styles/index.less';

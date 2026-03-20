@@ -3,9 +3,10 @@
         <div class="i-layout-sider-logo" :class="{ 'i-layout-sider-logo-dark': siderTheme === 'dark' }">
             <transition name="fade-quick">
                 <i-link to="/" v-show="!hideLogo">
-                    <img src="@/assets/images/logo-small.png" v-if="menuCollapse">
-                    <img src="@/assets/images/logo.png" v-else-if="siderTheme === 'light'">
-                    <img src="@/assets/images/logo-dark.png" v-else>
+                    <div class="i-layout-sider-logo-inner" :class="{ 'is-collapse': menuCollapse }">
+                        <img src="@/assets/images/favicon.png" alt="宠物领养救助之家">
+                        <span v-if="!menuCollapse" class="i-layout-sider-logo-text">宠物领养救助之家</span>
+                    </div>
                 </i-link>
             </transition>
         </div>
@@ -86,3 +87,31 @@
         }
     }
 </script>
+<style scoped>
+    .i-layout-sider-logo-inner {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        height: 63px;
+        padding: 0 12px;
+    }
+
+    .i-layout-sider-logo-inner img {
+        height: 34px;
+        width: 34px;
+        object-fit: contain;
+        flex: 0 0 auto;
+    }
+
+    .i-layout-sider-logo-inner.is-collapse {
+        padding: 0;
+    }
+
+    .i-layout-sider-logo-text {
+        font-size: 20px;
+        font-weight: 600;
+        line-height: 1;
+        white-space: nowrap;
+    }
+</style>

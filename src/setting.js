@@ -9,7 +9,7 @@ const Setting = {
      * 基础配置
      * */
     // 网页标题的后缀
-    titleSuffix: 'iView Admin Pro',
+    titleSuffix: '宠物领养救助之家',
     // 路由模式，可选值为 history 或 hash
     routerMode: 'history',
     // 应用的基路径

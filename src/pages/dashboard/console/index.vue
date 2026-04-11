@@ -41,7 +41,7 @@
 
         <Row :gutter="16" class="block-row">
             <Col :xs="24" :md="16" class="card-col">
-                <Card title="待办 · 领养申请">
+                <Card title="待办 · 领养申请" class="fill-card pending-card">
                     <Table :columns="pendingColumns" :data="pendingData" size="small" />
                     <div class="table-footer">
                         <Button type="primary" ghost @click="goToAdoptionReviewList">查看全部申请</Button>
@@ -65,7 +65,7 @@
 
         <Row :gutter="16" class="block-row">
             <Col :xs="24" :md="16" class="card-col">
-                <Card title="领养趋势（近 7 天）" class="fill-card">
+                <Card title="领养申请趋势（近 7 天）" class="fill-card">
                     <div class="trend">
                         <div class="trend-item" v-for="item in trendData" :key="item.day">
                             <span class="trend-label">{{ item.day }}</span>
@@ -225,11 +225,16 @@
     font-size: 12px;
 }
 .table-footer {
-    margin-top: 12px;
+    margin-top: auto;
     padding-top: 12px;
+    margin-bottom: 20px;
     text-align: right;
     position: relative;
     z-index: 1;
+}
+
+:deep(.pending-card .ivu-card-body) {
+    padding-bottom: 32px;
 }
 .side-stack {
     flex-direction: column;

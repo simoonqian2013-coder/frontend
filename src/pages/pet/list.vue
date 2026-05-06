@@ -6,6 +6,7 @@
                 <span class="ivu-pl-8">宠物管理</span>
             </div>
             <div slot="extra">
+                <Button class="ivu-mr-8" @click="exportCsv" :disabled="!allPets.length">导出CSV</Button>
                 <Button type="primary" @click="handleAdd">新增宠物</Button>
             </div>
             <Form inline :label-width="60" class="ivu-mb">
@@ -330,6 +331,40 @@
                     }
                 });
             },
+            exportCsv () {
+                const headers = ['ID', '昵称', '品种', '类型', '性别', '年龄', '城市', '地址', '状态', '创建时间', '详情'];
+                const rows = this.allPets.map(item => [
+                    item.id,
+                    item.nickname,
+                    item.breed,
+                    this.formatType(item.type),
+                    this.formatGender(item.gender),
+                    item.age,
+                    item.city,
+                    item.address,
+                    item.status === 1 ? '启用' : '禁用',
+                    item.createdAt,
+                    item.detail
+                ]);
+                const content = [headers, ...rows]
+                    .map(row => row.map(this.escapeCsvCell).join(','))
+                    .join('\r\n');
+                const blob = new Blob(['\uFEFF' + content], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `宠物列表_${this.formatExportTime()}.csv`;
+                link.click();
+                URL.revokeObjectURL(link.href);
+            },
+            escapeCsvCell (value) {
+                const text = value == null ? '' : String(value);
+                return `"${text.replace(/"/g, '""')}"`;
+            },
+            formatExportTime () {
+                const date = new Date();
+                const pad = value => String(value).padStart(2, '0');
+                return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}_${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
+            },
             handleSubmit () {
                 this.$refs.petForm.validate(valid => {
                     if (!valid) return;
@@ -386,9 +421,9 @@
                 return (mainItem && mainItem.url) || (list[0] && list[0].url) || row.image || '';
             },
             handleUploadSuccess (response, file) {
-                const url = (response && response.url)
-                    || (response && response.data && response.data.url)
-                    || (response && response.data && response.data[0] && response.data[0].url);
+                const url = (response && response.url) ||
+                    (response && response.data && response.data.url) ||
+                    (response && response.data && response.data[0] && response.data[0].url);
                 if (!url) {
                     Message.error('上传失败：未返回图片地址');
                     return;

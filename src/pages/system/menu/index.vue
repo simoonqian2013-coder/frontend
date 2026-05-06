@@ -14,11 +14,13 @@
                     <Tag color="red" v-else>禁用</Tag>
                 </template>
                 <template slot-scope="{ row }" slot="actions">
-                    <Button size="small" type="primary" @click="handleEdit(row)">编辑</Button>
-                    <Button size="small" class="ivu-ml-8" @click="handleAddChild(row)">新增子菜单</Button>
-                    <Button size="small" type="warning" class="ivu-ml-8" v-if="row.parentId && row.parentId !== 0" @click="handleOpenActionModal(row)">新增操作</Button>
-                    <Button size="small" class="ivu-ml-8" @click="handleOpenActionDetail(row)">操作详情</Button>
-                    <Button size="small" type="error" class="ivu-ml-8" @click="handleDelete(row)">删除</Button>
+                    <div class="action-buttons">
+                        <Button size="small" type="primary" @click="handleEdit(row)">编辑</Button>
+                        <Button size="small" @click="handleAddChild(row)">新增子菜单</Button>
+                        <Button size="small" type="warning" v-if="row.parentId && row.parentId !== 0" @click="handleOpenActionModal(row)">新增操作</Button>
+                        <Button size="small" @click="handleOpenActionDetail(row)">操作详情</Button>
+                        <Button size="small" type="error" @click="handleDelete(row)">删除</Button>
+                    </div>
                 </template>
             </Table>
         </Card>
@@ -159,7 +161,7 @@
                     { title: 'Header', key: 'header', width: 120 },
                     { title: '排序', key: 'sort', width: 80 },
                     { title: '状态', slot: 'status', width: 100 },
-                    { title: '操作', slot: 'actions', width: 340, align: 'center' }
+                    { title: '操作', slot: 'actions', width: 420, align: 'center' }
                 ],
                 modalVisible: false,
                 modalMode: 'create',
@@ -414,3 +416,13 @@
         }
     };
 </script>
+
+<style scoped>
+    .action-buttons {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+</style>

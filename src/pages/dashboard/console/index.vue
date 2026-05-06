@@ -112,6 +112,35 @@
                             <strong>{{ statusOverview.available }}</strong>
                         </div>
                     </div>
+                    <div class="pet-type-overview">
+                        <div class="overview-title">猫狗数量占比</div>
+                        <div class="type-row">
+                            <span>狗</span>
+                            <div class="type-progress">
+                                <div class="type-progress-inner dog" :style="{ width: petTypeStats.dogPercent + '%' }"></div>
+                            </div>
+                            <strong>{{ petTypeStats.dog }}只</strong>
+                        </div>
+                        <div class="type-row">
+                            <span>猫</span>
+                            <div class="type-progress">
+                                <div class="type-progress-inner cat" :style="{ width: petTypeStats.catPercent + '%' }"></div>
+                            </div>
+                            <strong>{{ petTypeStats.cat }}只</strong>
+                        </div>
+                        <div class="type-summary">共 {{ petTypeStats.total }} 只在册宠物</div>
+                    </div>
+                    <div class="approval-overview">
+                        <div class="overview-title">审核通过率</div>
+                        <div class="approval-main">
+                            <strong>{{ approvalStats.rate }}%</strong>
+                            <span>已通过 {{ approvalStats.approved }} / 已审核 {{ approvalStats.reviewed }}</span>
+                        </div>
+                        <div class="approval-progress">
+                            <div class="approval-progress-inner" :style="{ width: approvalStats.rate + '%' }"></div>
+                        </div>
+                        <div class="type-summary">仅统计已通过和已拒绝申请，不包含待审核</div>
+                    </div>
                 </Card>
             </Col>
         </Row>
@@ -119,6 +148,8 @@
 </template>
 <script>
     import { DashboardSummary } from '@/api/dashboard';
+    import { PetList } from '@/api/pet';
+    import { AdoptionList } from '@/api/adoption';
 
     export default {
         name: 'dashboard-console',
@@ -157,11 +188,26 @@
                     available: 0,
                     unavailable: 0,
                     needInfo: 0
+                },
+                petTypeStats: {
+                    dog: 0,
+                    cat: 0,
+                    total: 0,
+                    dogPercent: 0,
+                    catPercent: 0
+                },
+                approvalStats: {
+                    approved: 0,
+                    rejected: 0,
+                    reviewed: 0,
+                    rate: 0
                 }
             }
         },
         mounted () {
             this.fetchSummary();
+            this.fetchPetTypeStats();
+            this.fetchApprovalStats();
         },
         methods: {
             fetchSummary () {
@@ -178,6 +224,45 @@
                         this.statusOverview = res.statusOverview || this.statusOverview;
                     })
                     .catch(() => {});
+            },
+            fetchApprovalStats () {
+                AdoptionList()
+                    .then(res => {
+                        const list = Array.isArray(res) ? res : [];
+                        const approved = list.filter(item => item.status === 1).length;
+                        const rejected = list.filter(item => item.status === 2).length;
+                        const reviewed = approved + rejected;
+                        this.approvalStats = {
+                            approved,
+                            rejected,
+                            reviewed,
+                            rate: reviewed ? Math.round((approved / reviewed) * 100) : 0
+                        };
+                    })
+                    .catch(() => {});
+            },
+            fetchPetTypeStats () {
+                PetList()
+                    .then(res => {
+                        const list = Array.isArray(res) ? res : [];
+                        const dog = list.filter(item => this.normalizePetType(item.type) === 'DOG').length;
+                        const cat = list.filter(item => this.normalizePetType(item.type) === 'CAT').length;
+                        const total = dog + cat;
+                        this.petTypeStats = {
+                            dog,
+                            cat,
+                            total,
+                            dogPercent: total ? Math.round((dog / total) * 100) : 0,
+                            catPercent: total ? Math.round((cat / total) * 100) : 0
+                        };
+                    })
+                    .catch(() => {});
+            },
+            normalizePetType (value) {
+                const text = String(value || '').toUpperCase();
+                if (text === 'DOG' || text.includes('狗') || text.includes('犬')) return 'DOG';
+                if (text === 'CAT' || text.includes('猫')) return 'CAT';
+                return '';
             },
             goToAdoptionReviewList () {
                 this.$router.push({ name: 'adopt-review-list' });
@@ -326,6 +411,83 @@
 .status-item strong {
     font-size: 20px;
     color: #111827;
+}
+.pet-type-overview {
+    margin-top: 18px;
+    border-top: 1px solid #eef0f3;
+    padding-top: 16px;
+}
+.approval-overview {
+    margin-top: 18px;
+    border-top: 1px solid #eef0f3;
+    padding-top: 16px;
+}
+.overview-title {
+    color: #374151;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+.type-row {
+    display: grid;
+    grid-template-columns: 32px 1fr 48px;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    color: #4b5563;
+}
+.type-progress {
+    height: 10px;
+    background: #f3f4f6;
+    border-radius: 999px;
+    overflow: hidden;
+}
+.type-progress-inner {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.3s ease;
+}
+.type-progress-inner.dog {
+    background: #f59eaa;
+}
+.type-progress-inner.cat {
+    background: #60a5fa;
+}
+.type-row strong {
+    color: #374151;
+    font-size: 13px;
+    text-align: right;
+}
+.type-summary {
+    color: #9ca3af;
+    font-size: 12px;
+}
+.approval-main {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+.approval-main strong {
+    color: #111827;
+    font-size: 28px;
+}
+.approval-main span {
+    color: #6b7280;
+    font-size: 12px;
+}
+.approval-progress {
+    height: 10px;
+    background: #f3f4f6;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+.approval-progress-inner {
+    height: 100%;
+    border-radius: 999px;
+    background: #34d399;
+    transition: width 0.3s ease;
 }
 @media (max-width: 768px) {
     .card-col {

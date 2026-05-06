@@ -65,6 +65,7 @@
                 <div class="detail-item"><span>城市：</span>{{ currentRow.petCity || '-' }}</div>
                 <div class="detail-item"><span>申请人：</span>{{ currentRow.applicantName }}</div>
                 <div class="detail-item"><span>手机号：</span>{{ currentRow.phone }}</div>
+                <div class="detail-item"><span>邮箱：</span>{{ currentRow.email || '-' }}</div>
                 <div class="detail-item"><span>地址：</span>{{ currentRow.address }}</div>
                 <div class="detail-item"><span>备注：</span>{{ currentRow.remark || '-' }}</div>
                 <div class="detail-item"><span>状态：</span>{{ statusText(currentRow.status) }}</div>

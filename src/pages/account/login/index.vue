@@ -18,15 +18,8 @@
                 <Login @on-submit="handleSubmit">
                     <UserName name="username" value="admin" />
                     <Password name="password" value="admin" enter-to-submit />
-                    <div class="page-account-auto-login">
-                        <Checkbox v-model="autoLogin" size="large">{{ $t('page.login.remember') }}</Checkbox>
-                        <a href="">{{ $t('page.login.forgot') }}</a>
-                    </div>
                     <Submit>{{ $t('page.login.submit') }}</Submit>
                 </Login>
-                <div class="page-account-other">
-                    <router-link class="page-account-register" :to="{ name: 'register' }">立即注册</router-link>
-                </div>
             </div>
         </div>
         <i-copyright />
@@ -41,9 +34,7 @@
         mixins: [ mixins ],
         components: { iCopyright },
         data () {
-            return {
-                autoLogin: true
-            }
+            return {}
         },
         methods: {
             ...mapActions('admin/account', [

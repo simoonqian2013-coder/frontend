@@ -6,6 +6,7 @@
                 <span class="ivu-pl-8">领养审核</span>
             </div>
             <div slot="extra">
+                <Button class="ivu-mr-8" @click="exportCsv" :disabled="!allList.length">导出CSV</Button>
                 <Button type="primary" @click="fetchList">刷新</Button>
             </div>
             <Form inline :label-width="60" class="ivu-mb">
@@ -222,6 +223,38 @@
                             this.reviewLoading = false;
                         });
                 });
+            },
+            exportCsv () {
+                const headers = ['ID', '申请人', '手机号', '邮箱', '宠物名称', '提交时间', '状态', '地址', '备注'];
+                const rows = this.allList.map(item => [
+                    item.id,
+                    item.applicantName,
+                    item.phone,
+                    item.email || '',
+                    item.petNickname,
+                    item.createdAt,
+                    this.statusText(item.status),
+                    item.address || '',
+                    item.remark || ''
+                ]);
+                const content = [headers, ...rows]
+                    .map(row => row.map(this.escapeCsvCell).join(','))
+                    .join('\r\n');
+                const blob = new Blob(['\uFEFF' + content], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `领养申请_${this.formatExportTime()}.csv`;
+                link.click();
+                URL.revokeObjectURL(link.href);
+            },
+            escapeCsvCell (value) {
+                const text = value == null ? '' : String(value);
+                return `"${text.replace(/"/g, '""')}"`;
+            },
+            formatExportTime () {
+                const date = new Date();
+                const pad = value => String(value).padStart(2, '0');
+                return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}_${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
             },
             validateRemark (rule, value, callback) {
                 if (this.reviewForm.status === 2 && (!value || !value.trim())) {
